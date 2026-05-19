@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  wireguard-manager:
+    image: php:apache
+    container_name: wireguard-manager
+    ports:
+      - "8095:80"
+    volumes:
+      - ./:/var/www/html/
+      - /etc/wireguard:/etc/wireguard:ro
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

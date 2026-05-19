@@ -1,12 +1,17 @@
 {
-    "fsZnFeBuJB4Kcu4kT0kea+VR/XvqIEshnREZKCC6ukY=": {
+    "fsZnFeBuJB4Kcu4kT0kea+VR\/XvqIEshnREZKCC6ukY=": {
         "name": "Cosmas Router",
-        "ip": "10.0.0.2/32",
+        "ip": "10.0.0.2\/32",
         "registered_at": "2026-05-19 10:00:00"
     },
-    "RrhM/Ek4gj3dUudH+HYHgxjTE9ZDNIPybkzXZA3Aykk=": {
+    "RrhM\/Ek4gj3dUudH+HYHgxjTE9ZDNIPybkzXZA3Aykk=": {
         "name": "Ladu Router",
-        "ip": "10.0.0.3/32",
+        "ip": "10.0.0.3\/32",
         "registered_at": "2026-05-19 10:00:00"
+    },
+    "SimulatedKey123": {
+        "name": "SimulatedRouter",
+        "ip": "10.0.0.50",
+        "registered_at": "2026-05-19 14:02:34"
     }
 }

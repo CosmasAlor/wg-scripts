@@ -1,1 +1,4 @@
 [2026-05-19 08:30:31] Router: TestRouter_1779179431 | IP: 10.0.0.4 | Key: TEST_1779179431
+[2026-05-19 13:40:10] Router: TestRouter | IP: 10.0.0.99 | Key: test
+[2026-05-19 14:01:13] Router: TestRouter_1779199273 | IP: 10.0.0.99 | Key: TEST_1779199273
+[2026-05-19 14:02:34] Router: SimulatedRouter | IP: 10.0.0.50 | Key: SimulatedKey123
