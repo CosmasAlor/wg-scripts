@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WireGuard Enterprise Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);min-height:100vh;padding:20px;}
+        .container{max-width:1400px;margin:0 auto;}
+        .header{background:rgba(15,23,42,0.8);backdrop-filter:blur(20px);border-radius:24px;padding:20px 32px;margin-bottom:32px;border:1px solid rgba(99,102,241,0.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}
+        .logo h1{font-size:28px;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;background-clip:text;color:transparent;}
+        .logo p{color:#94a3b8;font-size:13px;margin-top:4px;}
+        .nav{display:flex;gap:12px;}
+        .nav-btn{background:rgba(51,65,85,0.8);color:#e2e8f0;padding:10px 20px;border-radius:12px;text-decoration:none;font-weight:500;transition:all 0.3s;}
+        .nav-btn:hover,.nav-btn.active{background:#667eea;transform:translateY(-2px);}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;margin-bottom:32px;}
+        .stat-card{background:rgba(15,23,42,0.8);backdrop-filter:blur(10px);border-radius:20px;padding:24px;border:1px solid rgba(99,102,241,0.2);text-align:center;}
+        .stat-value{font-size:42px;font-weight:800;color:white;margin-bottom:8px;}
+        .stat-label{color:#94a3b8;font-size:14px;}
+        .main-content{background:rgba(15,23,42,0.6);backdrop-filter:blur(10px);border-radius:24px;padding:32px;border:1px solid rgba(99,102,241,0.2);}
+        .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:15px;}
+        .section-title{font-size:20px;font-weight:600;color:white;display:flex;align-items:center;gap:10px;}
+        .section-title::before{content:'';width:4px;height:24px;background:#667eea;border-radius:2px;}
+        .refresh-btn{background:#667eea;color:white;border:none;padding:8px 20px;border-radius:10px;cursor:pointer;}
+        .table-wrapper{overflow-x:auto;}
+        table{width:100%;border-collapse:collapse;}
+        th{text-align:left;padding:16px;background:rgba(51,65,85,0.5);color:#cbd5e1;}
+        td{padding:16px;border-bottom:1px solid rgba(51,65,85,0.3);color:#e2e8f0;}
+        .status-online{color:#4ade80;}
+        .status-offline{color:#f87171;}
+        .router-name{font-weight:600;color:#667eea;}
+        .router-badge{background:rgba(99,102,241,0.2);padding:4px 10px;border-radius:20px;font-size:12px;}
+        .mono{font-family:monospace;font-size:11px;background:rgba(0,0,0,0.3);padding:4px 8px;border-radius:6px;}
+        .footer{text-align:center;margin-top:32px;color:#64748b;font-size:12px;}
+        @media(max-width:768px){.header{flex-direction:column;text-align:center;}}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo"><h1>⚡ WireGuard Enterprise Manager</h1><p>Professional VPN Management Platform</p></div>
+        <div class="nav">
+            <a href="index.html" class="nav-btn active">📊 Dashboard</a>
+            <a href="complete-auto-final.php" class="nav-btn">📝 Script Generator</a>
+            <a href="admin.php" class="nav-btn">⚙️ Admin</a>
+        </div>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="totalPeers">-</div><div class="stat-label">Total Peers</div></div>
+        <div class="stat-card"><div class="stat-value" id="onlinePeers">-</div><div class="stat-label">Online Peers</div></div>
+        <div class="stat-card"><div class="stat-value" id="offlinePeers">-</div><div class="stat-label">Offline Peers</div></div>
+        <div class="stat-card"><div class="stat-value">51820</div><div class="stat-label">WireGuard Port</div></div>
+    </div>
+    <div class="main-content">
+        <div class="section-header"><div class="section-title">🔗 Connected Routers</div><button class="refresh-btn" onclick="loadData()">🔄 Refresh</button></div>
+        <div id="peersContent"><div style="text-align:center;padding:40px;">Loading...</div></div>
+        <div id="lastUpdate" style="text-align:right;margin-top:20px;color:#64748b;font-size:12px;"></div>
+    </div>
+    <div class="footer"><p>WireGuard Enterprise Manager | Secure VPN Management</p></div>
+</div>
+<script>
+let routerNames = {};
+async function loadRouterNames(){try{const r=await fetch('/api/router_names.json?_='+Date.now());routerNames=await r.json();}catch(e){}}
+async function loadData(){await loadRouterNames();const r=await fetch('/wg-status.txt?_='+Date.now());const d=await r.text();document.getElementById('lastUpdate').innerHTML='Last updated: '+new Date().toLocaleString();parseData(d);}
+function parseData(data){const peers=[];let current=null;
+for(const line of data.split('\n')){
+    if(line.startsWith('peer:')){if(current)peers.push(current);current={key:line.substring(5).trim(),online:false,endpoint:'N/A',allowed_ip:'N/A',handshake:'Never',transfer:'N/A'};}
+    else if(current&&line.includes('endpoint:'))current.endpoint=line.split(':').slice(1).join(':').trim();
+    else if(current&&line.includes('allowed ips:'))current.allowed_ip=line.split(':').slice(1).join(':').trim();
+    else if(current&&line.includes('latest handshake:')){current.handshake=line.split(':').slice(1).join(':').trim();current.online=current.handshake.includes('second')||current.handshake.includes('minute');}
+    else if(current&&line.includes('transfer:'))current.transfer=line.split(':').slice(1).join(':').trim();
+}if(current)peers.push(current);
+const onlineCount=peers.filter(p=>p.online).length;
+document.getElementById('totalPeers').innerText=peers.length;
+document.getElementById('onlinePeers').innerText=onlineCount;
+document.getElementById('offlinePeers').innerText=peers.length-onlineCount;
+if(peers.length===0){document.getElementById('peersContent').innerHTML='<div style="text-align:center;padding:40px;">No peers connected</div>';return;}
+let html='<div class="table-wrapper"><table><thead><tr><th>Router Name</th><th>Status</th><th>Public Key</th><th>Allowed IP</th><th>Endpoint</th><th>Last Handshake</th><th>Transfer</th></tr></thead><tbody>';
+for(const p of peers){const name=routerNames[p.key]?routerNames[p.key].name:'Unknown';
+html+=`<tr><td><span class="router-name">🏷️ <span class="router-badge">${name}</span></span></td><td class="${p.online?'status-online':'status-offline'}">${p.online?'🟢 Online':'🔴 Offline'}</td><td><span class="mono">${p.key.substring(0,35)}...</span></td><td><code>${p.allowed_ip}</code></td><td>${p.endpoint}</td><td>${p.handshake}</td><td>${p.transfer}</td></tr>`;}
+html+='</tbody></table></div>';document.getElementById('peersContent').innerHTML=html;}
+loadData();setInterval(loadData,10000);
+</script>
+</body>
+</html>
